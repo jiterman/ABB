@@ -39,8 +39,8 @@ n_abb_t* buscar_padre_clave(n_abb_t* raiz, const char *clave, int (*abb_comparar
     //si es el padre de la clave que busco lo devuelvo
     if (raiz->izq && raiz->izq->clave == clave || raiz->der && raiz->der->clave == clave)) return raiz;
     //en caso contrario, continuo iterando al lado que corresponda
-    if (int (*abb_comparar_clave_t) ((raiz->izq->clave, clave))>0)buscar_padre_clave((raiz->izq, clave);
-    else buscar_padre_clave((raiz->der, clave);
+    if (int (*abb_comparar_clave_t) ((raiz->izq->clave, clave))>0) return buscar_padre_clave((raiz->izq, clave);
+    else return buscar_padre_clave((raiz->der, clave);
 }
 
 n_abb_t* buscar_padre(n_abb_t* nodo, n_abb_t* padre, const char *clave, int (*abb_comparar_clave_t)(const char *, const char *)){
@@ -158,9 +158,34 @@ size_t abb_cantidad(abb_t *arbol){
     return arbol->cant;
 }
 
-void abb_destruir(abb_t *arbol);
+void _abb_destruir(n_abb_t* nodo, void (*abb_destruir_dato_t) (void *)){
+    if (!nodo) return NULL;
+    //recorro post order
+    _abb_destruir(nodo->izq, abb_destruir_dato_t);
+    _abb_destruir(nodo->der, abb_destruir_dato_t);
+    abb_destruir_dato_t(nodo->dato);
+    free(nodo->clave);
+    free(nodo);
+}
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
+void abb_destruir(abb_t *arbol){
+    if (!arbol->raiz) return NULL;
+    _abb_destruir(arbol->raiz, arbol->abb_destruir_dato_t);
+    free(arbol);    
+}
+
+void _abb_in_order(n_abb_t *raiz, bool visitar(const char *, void *, void *), void *extra){
+    if(!raiz) return NULL;
+    _abb_in_order(raiz->izq, visitar, extra);
+    if(!visitar(raiz->clave, raiz->dato, extra)) return NULL;
+    _abb_in_order(raiz->der, visitar, extra);
+}
+
+
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
+    if(!arbol->raiz) return;
+    _abb_in_order(arbol->raiz, visitar, extra);
+}
 
 struct abb_iter{
     pila_t* pila;
