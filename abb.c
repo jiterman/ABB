@@ -30,13 +30,14 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 
     return abb;
 }
-
-n_abb_t* buscar_padre_clave(n_abb_t* raiz, const char *clave){
+/*Un entero menor que 0 si la primera cadena es menor que la segunda.
+Un entero mayor que 0 si la primera cadena es mayor que la segunda.*/
+n_abb_t* buscar_padre_clave(n_abb_t* raiz, const char *clave, int (*abb_comparar_clave_t) (const char *, const char *)){
     //reviso que el nodo exista y tenga hijos
     if (!raiz || (!raiz->izq && !raiz->der)) return;
     if (raiz->izq && raiz->izq->clave == clave || raiz->der && raiz->der->clave == clave)) return raiz;
-    buscar_padre_clave((raiz->izq, clave);
-    buscar_padre_clave((raiz->der, clave);
+    if (int (*abb_comparar_clave_t) ((raiz->izq->clave, clave))>0)buscar_padre_clave((raiz->izq, clave);
+    else buscar_padre_clave((raiz->der, clave);
 }
 
 n_abb_t* buscar_clave(n_abb_t* nodo, const char *clave){
@@ -49,19 +50,28 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 
 void *abb_borrar(abb_t *arbol, const char *clave){
     if (!arbol->raiz) return;
-    n_abb_t* padre_nodo_a_borrar;
-    if (arbol->raiz->clave != clave) {
-        padre_nodo_a_borrar = buscar_padre_clave(arbol->raiz, clave);
-        if (!padre_nodo_a_borrar) return;
-    }
-    n_abb_t* nodo_a_borrar = padre_nodo_a_borrar->izq;
-    if (padre_nodo_a_borrar->izq->clave != clave) nodo_a_borrar = padre_nodo_a_borrar->der;
+    //busco el padre del nodo a borrar
+    n_abb_t* padre_nodo_a_borrar = buscar_padre_clave(arbol->raiz, clave, arbol->abb_destruir_dato_t);
+    if (!padre_nodo_a_borrar) return;
+    n_abb_t* nodo_a_borrar =  padre_nodo_a_borrar->izq;
+    if (arbol->abb_destruir_dato_t(padre_nodo_a_borrar->izq->clave,clave)==0) nodo_a_borrar = padre_nodo_a_borrar->der;
+    if(!nodo_a_borrar) return;
+    void* dato_a_devolver = nodo_a_borrar->dato;
     //caso nodo a borrar tiene ambos hijos
-    if(nodo_a_borrar->izq && nodo_a_borrar->der)
+    if(nodo_a_borrar->izq && nodo_a_borrar->der){
+        
+    }
     //caso nodo sin hijos
-
+    else if(!nodo_a_borrar->izq && !nodo_a_borrar->der){
+        padre_nodo_a_borrar->izq = NULL;
+        padre_nodo_a_borrar->der = NULL;
+    }
     //caso nodo a borrar tiene un hijo
-
+    else{
+        if (arbol->abb_destruir_dato_t(padre_nodo_a_borrar->izq->clave, clave)
+    }
+    free(nodo_a_borrar);
+    return dato_a_devolver;
 }
 
 void *abb_obtener(const abb_t *arbol, const char *clave);
