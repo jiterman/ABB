@@ -68,19 +68,15 @@ n_abb_t* crear_nodo_abb(const char* clave, void* dato){
 }
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
-    n_abb_t** padre = malloc(sizeof(n_abb_t*));
-    if(!padre) return NULL;
-    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, padre, clave, arbol->cmp);
-    int comp_claves = comparar_claves(*padre, arbol, clave);
+    n_abb_t* padre = NULL;
+    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, &padre, clave, arbol->cmp);
+    int comp_claves = comparar_claves(padre, arbol, clave);
 
     if (!nodo){
         n_abb_t* nodo_nuevo = crear_nodo_abb(clave, dato);
-        if (!nodo_nuevo){
-            free(padre);
-            return false;
-        }
-        if (comp_claves < 0) (*padre)->izq = nodo_nuevo;
-        else if (comp_claves > 0) (*padre)->der = nodo_nuevo;
+        if (!nodo_nuevo) return false;
+        if (comp_claves < 0) (padre)->izq = nodo_nuevo;
+        else if (comp_claves > 0) (padre)->der = nodo_nuevo;
         else arbol->raiz = nodo_nuevo;
         arbol->cant++;
     }
@@ -88,7 +84,6 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
         if (arbol->destruir_dato) arbol->destruir_dato(nodo->dato);
         nodo->dato = dato;
     }
-    free(padre);
     return true;
 }
 
@@ -119,40 +114,33 @@ void borrar_otros_casos(n_abb_t* padre, n_abb_t* hijo_izq, n_abb_t* nodo, int co
 void *abb_borrar(abb_t *arbol, const char *clave){
     if (!arbol->cant) return NULL;
 
-    n_abb_t** padre = malloc(sizeof(n_abb_t*));
-    if(!padre) return NULL;
-    n_abb_t* nodo_a_borrar = buscar_nodo(arbol->raiz, NULL, padre, clave, arbol->cmp);
-    int comp_claves = comparar_claves(*padre, arbol, clave);
-    if(!nodo_a_borrar){
-        free(padre);
-        return NULL;
-    }
+    n_abb_t* padre = NULL;
+    n_abb_t* nodo_a_borrar = buscar_nodo(arbol->raiz, NULL, &padre, clave, arbol->cmp);
+    int comp_claves = comparar_claves(padre, arbol, clave);
+    if(!nodo_a_borrar) return NULL;
     void* dato_a_devolver = nodo_a_borrar->dato;
 
     n_abb_t* hijo_izq = nodo_a_borrar->izq; n_abb_t* hijo_der = nodo_a_borrar->der;
     if(hijo_izq && hijo_der) borrar_dos_hijos(arbol, nodo_a_borrar, hijo_izq);    
-    else borrar_otros_casos(*padre, hijo_izq, nodo_a_borrar, comp_claves, arbol);
+    else borrar_otros_casos(padre, hijo_izq, nodo_a_borrar, comp_claves, arbol);
 
-    free(padre);
     return dato_a_devolver;
 }
 
 void *abb_obtener(const abb_t *arbol, const char *clave){
-    n_abb_t** padre = malloc(sizeof(n_abb_t*));
-    if(!padre) return NULL;
+    n_abb_t* padre = NULL;
     
-    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, padre, clave, arbol->cmp);
-    free(padre);
+    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, &padre, clave, arbol->cmp);
+
     if (!nodo) return NULL;
     return nodo->dato;
 }
 
 bool abb_pertenece(const abb_t *arbol, const char *clave){
-    n_abb_t** padre = malloc(sizeof(n_abb_t*));
-    if(!padre) return NULL;
-    
-    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, padre, clave, arbol->cmp);
-    free(padre);
+    n_abb_t* padre = NULL;
+
+    n_abb_t* nodo = buscar_nodo(arbol->raiz, NULL, &padre, clave, arbol->cmp);
+
     return !!nodo;
 }
 
